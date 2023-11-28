@@ -81,8 +81,8 @@ class DelayModel:
         n_y0 = 37298
         n_y1 = 8400
         class_weight={1: n_y0/len(y_train), 0: n_y1/len(y_train)}
-        self._model = LogisticRegression(class_weight=class_weight)
-        self._model.fit(x_train, y_train)
+        reg_model_2 = LogisticRegression(class_weight=class_weight)
+        self._model = reg_model_2.fit(x_train, y_train)
         return None
 
     def predict(
@@ -98,4 +98,13 @@ class DelayModel:
         Returns:
             (List[int]): predicted targets.
         """
-        return
+        if self._model is None:
+            # the probles is with the test
+            raise ValueError("Model has not been trained. Call 'fit' method first.")
+
+        predictions = self._model.predict(features)
+
+        # Convert predictions to a list of integers
+        predicted_targets = list(map(int, predictions))
+
+        return predicted_targets
