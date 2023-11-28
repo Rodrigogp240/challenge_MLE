@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 
 from typing import Tuple, Union, List
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 from .module.getMinDiff import get_min_diff
 from .module.getPeriodDay import get_period_day
 from .module.isHighSeason import is_high_season
@@ -74,7 +77,13 @@ class DelayModel:
             features (pd.DataFrame): preprocessed data.
             target (pd.DataFrame): target.
         """
-        return
+        x_train, _, y_train, _ = train_test_split(features, target, test_size = 0.33, random_state = 42)
+        n_y0 = 37298
+        n_y1 = 8400
+        class_weight={1: n_y0/len(y_train), 0: n_y1/len(y_train)}
+        self._model = LogisticRegression(class_weight=class_weight)
+        self._model.fit(x_train, y_train)
+        return None
 
     def predict(
         self,
