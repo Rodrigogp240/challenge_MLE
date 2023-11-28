@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 
 from typing import Tuple, Union, List
-from Modules import get_min_diff, is_high_season, get_period_day
+from .module.getMinDiff import get_min_diff
+from .module.getPeriodDay import get_period_day
+from .module.isHighSeason import is_high_season
 
 
 class DelayModel:
@@ -16,7 +18,7 @@ class DelayModel:
         self,
         data: pd.DataFrame,
         target_column: str = None
-    ) -> Union(Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame):
+    ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
         """
         Prepare raw data for training or predict.
 
@@ -29,20 +31,35 @@ class DelayModel:
             or
             pd.DataFrame: features.
         """
+        top_10_features = [
+            "OPERA_Latin American Wings",
+            "MES_7",
+            "MES_10",
+            "OPERA_Grupo LATAM",
+            "MES_12",
+            "TIPOVUELO_I",
+            "MES_4",
+            "MES_11",
+            "OPERA_Sky Airline",
+            "OPERA_Copa Air"
+        ]
         data['period_day'] = data['Fecha-I'].apply(get_period_day)
         data['high_season'] = data['Fecha-I'].apply(is_high_season)
         data['min_diff'] = data.apply(get_min_diff, axis=1)
         threshold_in_minutes = 15
         data['delay'] = np.where(data['min_diff'] > threshold_in_minutes, 1, 0)
+
         features = pd.concat([
             pd.get_dummies(data['OPERA'], prefix='OPERA'),
             pd.get_dummies(data['TIPOVUELO'], prefix='TIPOVUELO'),
             pd.get_dummies(data['MES'], prefix='MES')],
             axis=1
         )
+        features = features[top_10_features]
+
         if target_column:
             target = data[target_column]
-            return (features,target)
+            return (features, target.to_frame())
         return features
 
     def fit(
