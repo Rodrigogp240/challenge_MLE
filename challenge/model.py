@@ -1,6 +1,8 @@
 import pandas as pd
+import numpy as np
 
 from typing import Tuple, Union, List
+from Modules import get_min_diff,is_high_season,get_period_day
 
 class DelayModel:
 
@@ -26,6 +28,11 @@ class DelayModel:
             or
             pd.DataFrame: features.
         """
+        data['period_day'] = data['Fecha-I'].apply(get_period_day)
+        data['high_season'] = data['Fecha-I'].apply(is_high_season)
+        data['min_diff'] = data.apply(get_min_diff, axis = 1)
+        threshold_in_minutes = 15
+        data['delay'] = np.where(data['min_diff'] > threshold_in_minutes, 1, 0)
         return
 
     def fit(
