@@ -60,10 +60,11 @@ class DelayModel:
         )
         features = features[top_10_features]
 
-        if target_column:
-            target = data[target_column]
-            return (features, target.to_frame())
-        return features
+        if not target_column:
+            return features
+        
+        target = data[target_column]
+        return (features, target.to_frame())
 
     def fit(
         self,
