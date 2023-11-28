@@ -2,14 +2,15 @@ import pandas as pd
 import numpy as np
 
 from typing import Tuple, Union, List
-from Modules import get_min_diff,is_high_season,get_period_day
+from Modules import get_min_diff, is_high_season, get_period_day
+
 
 class DelayModel:
 
     def __init__(
         self
     ):
-        self._model = None # Model should be saved in this attribute.
+        self._model = None  # Model should be saved in this attribute.
 
     def preprocess(
         self,
@@ -30,10 +31,19 @@ class DelayModel:
         """
         data['period_day'] = data['Fecha-I'].apply(get_period_day)
         data['high_season'] = data['Fecha-I'].apply(is_high_season)
-        data['min_diff'] = data.apply(get_min_diff, axis = 1)
+        data['min_diff'] = data.apply(get_min_diff, axis=1)
         threshold_in_minutes = 15
         data['delay'] = np.where(data['min_diff'] > threshold_in_minutes, 1, 0)
-        return
+        features = pd.concat([
+            pd.get_dummies(data['OPERA'], prefix='OPERA'),
+            pd.get_dummies(data['TIPOVUELO'], prefix='TIPOVUELO'),
+            pd.get_dummies(data['MES'], prefix='MES')],
+            axis=1
+        )
+        if target_column:
+            target = data[target_column]
+            return (features,target)
+        return features
 
     def fit(
         self,
@@ -58,7 +68,7 @@ class DelayModel:
 
         Args:
             features (pd.DataFrame): preprocessed data.
-        
+
         Returns:
             (List[int]): predicted targets.
         """
