@@ -1,6 +1,7 @@
 import fastapi
 
-from pydantic import BaseModel,list
+from pydantic import BaseModel
+from typing import List
 from .model import DelayModel
 
 app = fastapi.FastAPI()
