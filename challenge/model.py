@@ -8,6 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from .module.getMinDiff import get_min_diff
 from .module.getPeriodDay import get_period_day
 from .module.isHighSeason import is_high_season
+import pickle
 
 
 class DelayModel:
@@ -109,3 +110,14 @@ class DelayModel:
         predicted_targets = list(map(int, predictions))
 
         return predicted_targets
+    
+    def importer(
+        self,
+    )-> None:
+        if self._model is None:
+            # the probles is with the test
+            raise ValueError("Model has not been trained. Call 'fit' method first.")
+        with open('trained_log_reg-0.1.0.pkl') as f:
+            pickle.dump(self._model,f)
+        return None
+
