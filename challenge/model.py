@@ -117,7 +117,7 @@ class DelayModel:
         if self._model is None:
             # the probles is with the test
             raise ValueError("Model has not been trained. Call 'fit' method first.")
-        with open('trained_log_reg-0.1.0.pkl') as f:
+        with open('trained_log_reg-0.1.0.pkl',"wb") as f:
             pickle.dump(self._model,f)
         return None
 
