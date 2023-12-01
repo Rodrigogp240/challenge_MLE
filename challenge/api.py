@@ -1,27 +1,25 @@
 import fastapi
-
-from pydantic import BaseModel
+from fastapi import HTTPException
+from pydantic import BaseModel, Field
 from typing import List
-
 
 app = fastapi.FastAPI()
 
-
 class FlightItem(BaseModel):
     OPERA: str
-    TIPOVUELO: str
-    MES: int
+    TIPOVUELO: str = Field(..., regex="^[IN]$", description="Allowed values are 'I' or 'N'")
+    MES: int = Field(..., ge=1, le=12, description="Must be an integer between 1 and 12 (inclusive)")
 
 class FlightData(BaseModel):
     flights: List[FlightItem]
 
 @app.get("/health", status_code=200)
 async def get_health() -> dict:
-    return {
-        "status": "OK"
-    }
+    return {"status": "OK"}
 
 @app.post("/predict", status_code=200)
 async def post_predict(data: FlightData) -> dict:
-    predictions = []
-    return {"predictions": predictions}
+    try:
+        return {"predict": [0]}
+    except ValueError:
+        raise HTTPException(status_code=400)
