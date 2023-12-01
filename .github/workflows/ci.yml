@@ -2,64 +2,63 @@ name: Continuous integration
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 permissions:
   contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
 
-    - name: Set up virtual environment
-      run: |
-        python -m venv .venv
-        source .venv/bin/activate
+      - name: Set up virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
 
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install flake8 pytest
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pip
+            .venv
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-        # Install dependencies from requirements-dev.txt
-        if [ -f requirements-dev.txt ]; then
-          echo "Installing dependencies from requirements-dev.txt"
-          pip install -r requirements-dev.txt
-        fi
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install flake8 pytest
 
-        # Install dependencies from requirements-test.txt
-        if [ -f requirements-test.txt ]; then
-          echo "Installing dependencies from requirements-test.txt"
-          pip install -r requirements-test.txt
-        fi
+          # Install dependencies from requirements-dev.txt
+          if [ -f requirements-dev.txt ]; then
+            echo "Installing dependencies from requirements-dev.txt"
+            pip install -r requirements-dev.txt
+          fi
 
-        # Install dependencies from requirements.txt
-        if [ -f requirements.txt ]; then
-          echo "Installing dependencies from requirements.txt"
-          pip install -r requirements.txt
-        fi
+          # Install dependencies from requirements-test.txt
+          if [ -f requirements-test.txt ]; then
+            echo "Installing dependencies from requirements-test.txt"
+            pip install -r requirements-test.txt
+          fi
 
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cache/pip
-          .venv
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+          # Install dependencies from requirements.txt
+          if [ -f requirements.txt ]; then
+            echo "Installing dependencies from requirements.txt"
+            pip install -r requirements.txt
+          fi
 
-    - name: Test with pytest
-      run: |
-        pytest tests
+      - name: Test with pytest
+        run: |
+          cd tests
+          pytest tests

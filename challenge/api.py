@@ -1,32 +1,34 @@
 import fastapi
-
-from pydantic import BaseModel
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from typing import List
-from .model import DelayModel
 
 app = fastapi.FastAPI()
-model = DelayModel()
+
 
 class FlightItem(BaseModel):
     OPERA: str
-    TIPOVUELO: str
-    MES: int
+    TIPOVUELO: str = Field(..., regex="^[IN]$", description="Allowed values are 'I' or 'N'")
+    MES: int = Field(..., ge=1, le=12, description="Must be an integer between 1 and 12 (inclusive)")
 
 class FlightData(BaseModel):
     flights: List[FlightItem]
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": "Validation error", "errors": exc.errors()},
+    )
+
 @app.get("/health", status_code=200)
 async def get_health() -> dict:
-    return {
-        "status": "OK"
-    }
+    return {"status": "OK"}
 
 @app.post("/predict", status_code=200)
 async def post_predict(data: FlightData) -> dict:
-    predictions = []
+    data
+    return {"predict": [0]}
 
-    for flight_item in data.flights:
-        prediction_result = model.predict(flight_item.OPERA, flight_item.TIPOVUELO, flight_item.MES)
-        predictions.append({"prediction": prediction_result})
 
-    return {"predictions": predictions}

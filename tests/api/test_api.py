@@ -1,11 +1,17 @@
 import unittest
-
+from unittest.mock import ANY
+import joblib
 
 from fastapi.testclient import TestClient
+from mockito import when
+import numpy as np
 from challenge import app
 
+model_path = "../challenge/trained_log_reg-0.1.0.pkl"
+model = joblib.load(model_path)
 
 class TestBatchPipeline(unittest.TestCase):
+
     def setUp(self):
         self.client = TestClient(app)
         
@@ -19,7 +25,7 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        #when("sklearn.linear_model.LogisticRegression").predict(ANY).thenReturn(np.array([0])) # change this line to the model of chosing
+        when(model).predict(ANY).thenReturn(np.array([0])) # change this line to the model of chosing
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"predict": [0]})
@@ -35,7 +41,7 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        #when("sklearn.linear_model.LogisticRegression").predict(ANY).thenReturn(np.array([0]))# change this line to the model of chosing
+        when(model).predict(ANY).thenReturn(np.array([0])) # change this line to the model of chosing
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 400)
 
@@ -49,7 +55,7 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        #when('sklearn.linear_model.LogisticRegression').predict(ANY).thenReturn(np.array([0]))# change this line to the model of chosing
+        when(model).predict(ANY).thenReturn(np.array([0])) # change this line to the model of chosing
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 400)
     
@@ -63,6 +69,6 @@ class TestBatchPipeline(unittest.TestCase):
                 }
             ]
         }
-        #when('sklearn.linear_model.LogisticRegression').predict(ANY).thenReturn(np.array([0]))
+        when(model).predict(ANY).thenReturn(np.array([0])) # change this line to the model of chosing)
         response = self.client.post("/predict", json=data)
         self.assertEqual(response.status_code, 400)
